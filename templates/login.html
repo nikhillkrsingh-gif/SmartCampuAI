@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCampus AI — Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.35);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --text-muted: #94a3b8;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
+
+        body {
+            background-color: #05070d;
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(99, 102, 241, 0.18) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 90%, rgba(56, 189, 248, 0.12) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f8fafc;
+            padding: 24px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            background: rgba(13, 18, 32, 0.85);
+            border: 1px solid var(--border-glass);
+            border-radius: 28px;
+            padding: 40px 32px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 0 0 50px var(--accent-glow);
+            backdrop-filter: blur(24px);
+            text-align: center;
+            position: relative;
+        }
+
+        .logo-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            border-radius: 22px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(129, 140, 248, 0.5);
+            margin-bottom: 16px;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .logo-svg { width: 40px; height: 40px; }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .sub-desc { color: var(--text-muted); font-size: 0.86rem; margin-bottom: 22px; }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: rgba(7, 10, 18, 0.85);
+            padding: 5px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-glass);
+        }
+
+        .rbtn {
+            background: none;
+            border: none;
+            padding: 9px 0;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .rbtn.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(99,102,241,0.5);
+        }
+
+        .fg { margin-bottom: 16px; text-align: left; }
+        .fg label { display: block; font-size: 0.82rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
+        .fg input {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(8, 12, 22, 0.85);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            color: #fff;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .fg input:focus { border-color: rgba(129, 140, 248, 0.6); box-shadow: 0 0 16px rgba(99,102,241,0.3); }
+
+        .input-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .input-btn-group input {
+            flex: 1;
+        }
+        .btn-inline-verify {
+            padding: 0 16px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(129, 140, 248, 0.4);
+            color: #c7d2fe;
+            font-weight: 700;
+            font-size: 0.82rem;
+            border-radius: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .btn-inline-verify:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.5);
+            transition: transform 0.15s ease, background 0.15s ease;
+            margin-top: 4px;
+        }
+        .btn-action:hover { background: var(--primary-hover); transform: scale(1.01); }
+
+        .switch-wrap { text-align: center; margin-top: 20px; font-size: 0.82rem; color: var(--text-muted); }
+        .switch-wrap a { color: #818cf8; text-decoration: none; font-weight: 600; }
+
+        .footer-tag { margin-top: 24px; font-size: 0.75rem; color: #64748b; }
+
+        /* Modal Dialog */
+        .modal-alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .alert-card {
+            background: #111827;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 360px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+        }
+        .alert-card h3 { color: #f87171; font-size: 1.15rem; margin-bottom: 8px; }
+        .alert-card p { color: #cbd5e1; font-size: 0.88rem; line-height: 1.5; margin-bottom: 20px; }
+        .btn-close-alert {
+            width: 100%;
+            padding: 10px;
+            background: #ef4444;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="logo-wrap">
+        <svg class="logo-svg" viewBox="0 0 48 48" fill="none">
+            <path d="M24 4L28.5 17.5L42 22L28.5 26.5L24 40L19.5 26.5L6 22L19.5 17.5L24 4Z" fill="#818cf8" opacity="0.95" />
+            <circle cx="24" cy="22" r="14" stroke="#818cf8" stroke-width="1.8" stroke-dasharray="3 3" />
+            <circle cx="24" cy="22" r="4" fill="#ffffff" />
+        </svg>
+    </div>
+
+    <h1>SmartCampus AI</h1>
+    <p class="sub-desc" id="subHead">Sign in with your campus ID</p>
+
+    <!-- Role Selection (Login View) -->
+    <div class="role-selector" id="roleWrap">
+        <button type="button" class="rbtn active" data-role="student">Student</button>
+        <button type="button" class="rbtn" data-role="faculty">Faculty</button>
+        <button type="button" class="rbtn" data-role="admin">Admin</button>
+    </div>
+
+    <!-- 1. LOGIN FORM: SIMPLE USERNAME + PASSWORD ONLY -->
+    <form id="fLogin">
+        <div class="fg">
+            <label>Username</label>
+            <input type="text" id="logUser" placeholder="Enter your username" required autocomplete="username">
+        </div>
+        <div class="fg">
+            <label>Password</label>
+            <input type="password" id="logPass" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-action">Sign In</button>
+    </form>
+
+    <!-- 2. STUDENT REGISTRATION FORM (WITH EMAIL VERIFICATION & OTP) -->
+    <form id="fRegister" style="display:none;">
+        <div class="fg">
+            <label>Student Username</label>
+            <input type="text" id="regUser" placeholder="Choose a username" required>
+        </div>
+        <div class="fg">
+            <label>Student Gmail / Email</label>
+            <div class="input-btn-group">
+                <input type="email" id="regEmail" placeholder="your_name@gmail.com" required>
+                <button type="button" class="btn-inline-verify" id="btnSendOtp" onclick="sendRegistrationOtp()">Verify (Send OTP)</button>
+            </div>
+        </div>
+        <div class="fg" id="otpGroup" style="display:none;">
+            <label style="color:#4ade80;">Enter 6-Digit Code from Gmail</label>
+            <input type="text" id="regOtp" maxlength="6" placeholder="Enter 6-digit code received in email" style="letter-spacing:4px; font-weight:700;">
+        </div>
+        <div class="fg">
+            <label>Create Password</label>
+            <input type="password" id="regPass" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-action">Verify OTP & Register Student ID</button>
+    </form>
+
+    <div class="switch-wrap" id="swBox">
+        <span id="swTxt">New student?</span>
+        <a href="javascript:void(0)" id="swLink" onclick="toggleRegisterView()">Create Student Account</a>
+    </div>
+
+    <div class="footer-tag">Nikhil Kumar Singh &bull; Team FutureMind &bull; Oct 2026</div>
+</div>
+
+<!-- Modal Alert Dialog -->
+<div class="modal-alert-overlay" id="alertModal">
+    <div class="alert-card">
+        <h3 id="alertTitle">Notice</h3>
+        <p id="alertMsg">Invalid Username or Password!</p>
+        <button type="button" class="btn-close-alert" onclick="closeAlert()">Dismiss</button>
+    </div>
+</div>
+
+<script>
+    var currentRole = 'student';
+    var isRegisterMode = false;
+
+    document.querySelectorAll('.rbtn').forEach(function(btn){
+        btn.onclick = function(){
+            document.querySelectorAll('.rbtn').forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+            currentRole = btn.getAttribute('data-role');
+            document.getElementById('swBox').style.display = (currentRole === 'student' ? 'block' : 'none');
+        };
+    });
+
+    function toggleRegisterView(){
+        isRegisterMode = !isRegisterMode;
+        if(isRegisterMode){
+            document.getElementById('fLogin').style.display = 'none';
+            document.getElementById('roleWrap').style.display = 'none';
+            document.getElementById('fRegister').style.display = 'block';
+            document.getElementById('subHead').innerText = 'Create Student ID with verified email';
+            document.getElementById('swTxt').innerText = 'Already have an ID?';
+            document.getElementById('swLink').innerText = 'Sign In here';
+        } else {
+            document.getElementById('fRegister').style.display = 'none';
+            document.getElementById('fLogin').style.display = 'block';
+            document.getElementById('roleWrap').style.display = 'grid';
+            document.getElementById('subHead').innerText = 'Sign in with your campus ID';
+            document.getElementById('swTxt').innerText = 'New student?';
+            document.getElementById('swLink').innerText = 'Create Student Account';
+        }
+    }
+
+    function showAlert(msg, title){
+        document.getElementById('alertTitle').innerText = title || "Notice";
+        document.getElementById('alertMsg').innerText = msg;
+        document.getElementById('alertModal').style.display = 'flex';
+    }
+
+    function closeAlert(){
+        document.getElementById('alertModal').style.display = 'none';
+    }
+
+    // 1. Handle Login (Username & Password only)
+    document.getElementById('fLogin').onsubmit = function(e){
+        e.preventDefault();
+        var u = document.getElementById('logUser').value.trim();
+        var p = document.getElementById('logPass').value.trim();
+
+        fetch('/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: u, password: p, role: currentRole})
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if(d.success){
+                window.location.href = d.redirect;
+            } else {
+                showAlert(d.error || 'Invalid credentials.', 'Login Failed');
+            }
+        })
+        .catch(function(){
+            showAlert('Server connection error. Please try again.', 'Error');
+        });
+    };
+
+    // 2. Dispatch Registration OTP to Gmail
+    function sendRegistrationOtp(){
+        var email = document.getElementById('regEmail').value.trim();
+        if(!email || email.indexOf('@') === -1){
+            showAlert('Please enter a valid Gmail / Email address before verifying.', 'Invalid Email');
+            return;
+        }
+
+        var btn = document.getElementById('btnSendOtp');
+        btn.disabled = true;
+        btn.innerText = 'Sending...';
+
+        fetch('/api/register/send_otp', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email: email})
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            btn.disabled = false;
+            btn.innerText = 'Resend Code';
+            if(d.success){
+                document.getElementById('otpGroup').style.display = 'block';
+                showAlert(d.message + ' Please check your inbox or spam folder.', 'OTP Sent');
+                document.getElementById('regOtp').focus();
+            } else {
+                showAlert(d.error, 'Verification Error');
+            }
+        })
+        .catch(function(){
+            btn.disabled = false;
+            btn.innerText = 'Verify (Send OTP)';
+            showAlert('Server unreachable. Please check connection.', 'Error');
+        });
+    }
+
+    // 3. Complete Student Registration by Verifying OTP
+    document.getElementById('fRegister').onsubmit = function(e){
+        e.preventDefault();
+        var u = document.getElementById('regUser').value.trim();
+        var em = document.getElementById('regEmail').value.trim();
+        var otp = document.getElementById('regOtp').value.trim();
+        var p = document.getElementById('regPass').value.trim();
+
+        if(!otp){
+            showAlert('Please click "Verify (Send OTP)" and enter the 6-digit code received in your email.', 'OTP Required');
+            return;
+        }
+
+        fetch('/api/register/verify_and_create', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: u, email: em, password: p, otp: otp})
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if(d.success){
+                showAlert(d.message, 'Success');
+                toggleRegisterView();
+                document.getElementById('logUser').value = u;
+                document.getElementById('logPass').value = '';
+            } else {
+                showAlert(d.error, 'Registration Failed');
+            }
+        })
+        .catch(function(){
+            showAlert('Server connection failed. Try again.', 'Error');
+        });
+    };
+</script>
+</body>
+</html>

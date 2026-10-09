@@ -1,0 +1,10 @@
+flask
+werkzeug
+pypdf
+python-docx
+groq
+python-dotenv
+pdfplumber
+easyocr
+pillow
+Flask-Mail

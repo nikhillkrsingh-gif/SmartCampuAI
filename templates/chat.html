@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCampus AI — Team FutureMind Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background-color: #060912;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 40%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.1) 0px, transparent 40%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: rgba(10, 14, 26, 0.85);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px 18px;
+            backdrop-filter: blur(20px);
+        }
+
+        .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .brand-logo-text { display: flex; align-items: center; gap: 10px; }
+        .logo-small-svg { width: 28px; height: 28px; }
+
+        /* Pure solid styling - No background-clip */
+        .brand-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+
+        .role-pill {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-new {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--primary);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.15s ease;
+        }
+        .btn-new:hover { background: var(--primary-hover); }
+
+        .section-label { font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 10px; }
+
+        .admin-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .admin-action-btn {
+            width: 100%;
+            padding: 9px 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+        }
+        .admin-action-btn:hover { background: rgba(255,255,255,0.04); color: #fff; }
+
+        .session-list { flex: 1; overflow-y: auto; margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+
+        .session-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .session-item-row:hover { background: rgba(255, 255, 255, 0.05); }
+        .session-item-row.active {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .session-title-text {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 8px;
+        }
+        .session-item-row.active .session-title-text { color: #c7d2fe; font-weight: 600; }
+
+        .btn-del-thread {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #f87171;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-del-thread:hover { background: rgba(239, 68, 68, 0.25); }
+
+        .user-footer { padding-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; }
+        .user-avatar { width: 34px; height: 34px; border-radius: 10px; background: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; color: #fff; }
+        .btn-logout { background: none; border: none; color: #f87171; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+
+        .workspace { flex: 1; display: flex; flex-direction: column; height: 100vh; position: relative; }
+        .header-bar { padding: 16px 28px; border-bottom: 1px solid var(--border-subtle); background: rgba(11, 15, 26, 0.6); display: flex; align-items: center; justify-content: space-between; }
+
+        .chat-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .msg-row { display: flex; gap: 12px; max-width: 82%; }
+        .msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
+        .msg-row.bot { align-self: flex-start; }
+
+        .msg-avatar { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+        .msg-row.user .msg-avatar { background: #3b82f6; color: #fff; }
+        .msg-row.bot .msg-avatar { background: #6366f1; color: #fff; }
+
+        .bubble {
+            width: fit-content;
+            max-width: 100%;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .msg-row.user .bubble { background: #4338ca; color: #fff; }
+        .msg-row.bot .bubble { background: rgba(17, 24, 39, 0.7); border: 1px solid var(--border-subtle); color: #e2e8f0; backdrop-filter: blur(10px); }
+
+        .bubble table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.88rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); }
+        .bubble th { background: rgba(99, 102, 241, 0.15); color: #c7d2fe; padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); }
+        .bubble td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+
+        .prompt-chips { display: flex; gap: 8px; padding: 6px 28px 0 28px; overflow-x: auto; }
+        .chip { background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-subtle); padding: 5px 12px; border-radius: 999px; font-size: 0.78rem; color: #94a3b8; cursor: pointer; white-space: nowrap; }
+
+        .input-dock { padding: 12px 28px 20px 28px; }
+        .input-box {
+            display: flex;
+            align-items: center;
+            background: rgba(19, 26, 43, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 6px 8px 6px 16px;
+        }
+        .input-box input { flex: 1; background: none; border: none; color: #fff; font-size: 0.95rem; outline: none; }
+        .btn-send { padding: 9px 20px; background: var(--primary); border: none; border-radius: 8px; color: #fff; font-weight: 700; cursor: pointer; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 100; align-items: center; justify-content: center; }
+        .modal-card { background: #101626; border: 1px solid var(--border-subtle); border-radius: 18px; width: 100%; max-width: 500px; padding: 26px; }
+
+        /* Dynamic Thinking Indicator (Matches Login Logo Style) */
+        .thinking-bubble {
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(99, 102, 241, 0.35) !important;
+            box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.25);
+            padding: 10px 18px;
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+        }
+
+        .thinking-logo-wrap {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(129, 140, 248, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.45);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .thinking-logo-svg {
+            width: 26px;
+            height: 26px;
+            overflow: visible;
+        }
+
+        .thinking-star {
+            transform-origin: 24px 22px;
+            animation: pulseStar 1.8s ease-in-out infinite;
+        }
+
+        .thinking-ring {
+            transform-origin: 24px 22px;
+            animation: rotateRing 3s linear infinite;
+        }
+
+        .thinking-core {
+            transform-origin: 24px 22px;
+            animation: pulseCore 1.2s ease-in-out infinite;
+        }
+
+        @keyframes rotateRing {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseStar {
+            0%, 100% {
+                transform: scale(0.96);
+                opacity: 0.9;
+                filter: drop-shadow(0 0 3px rgba(129, 140, 248, 0.5));
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 1;
+                filter: drop-shadow(0 0 9px rgba(129, 140, 248, 0.95));
+            }
+        }
+
+        @keyframes pulseCore {
+            0%, 100% {
+                transform: scale(0.85);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.25);
+                opacity: 1;
+            }
+        }
+
+        .thinking-text-wrap {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .thinking-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #c7d2fe;
+            letter-spacing: 0.2px;
+        }
+
+        .thinking-dots {
+            display: inline-flex;
+            gap: 2px;
+            margin-left: 1px;
+        }
+
+        .thinking-dots span {
+            font-size: 1.2rem;
+            line-height: 0.7;
+            color: #818cf8;
+            animation: waveDot 1.4s infinite ease-in-out both;
+        }
+
+        .thinking-dots span:nth-child(1) { animation-delay: 0s; }
+        .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes waveDot {
+            0%, 80%, 100% {
+                opacity: 0.25;
+                transform: translateY(0);
+            }
+            40% {
+                opacity: 1;
+                transform: translateY(-3px);
+                color: #c7d2fe;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div>
+        <div class="brand">
+            <div class="brand-logo-text">
+                <svg class="logo-small-svg" viewBox="0 0 48 48" fill="none">
+                    <path d="M24 4L28.5 17.5L42 22L28.5 26.5L24 40L19.5 26.5L6 22L19.5 17.5L24 4Z" fill="#818cf8" />
+                    <circle cx="24" cy="22" r="4" fill="#ffffff" />
+                </svg>
+                <span class="brand-title">SmartCampus</span>
+            </div>
+            <span class="role-pill">{{ role }}</span>
+        </div>
+        <button class="btn-new" id="bNewChat">+ New Conversation</button>
+
+        {% if role in ['admin', 'faculty'] %}
+        <div class="section-label">Management</div>
+        <div class="admin-box">
+            {% if role == 'admin' %}
+            <button class="admin-action-btn" id="bFacM">Register Faculty ID</button>
+            {% endif %}
+            <button class="admin-action-btn" id="bUpM">📄 Campus Documents (PDF/DOCX/CSV)</button>
+            <button class="admin-action-btn" id="bUpImg">🖼️ Upload Poster / Photo (OCR)</button>
+        </div>
+        {% endif %}
+
+        <div class="section-label">Chat Threads</div>
+        <div class="session-list" id="sList"></div>
+    </div>
+
+    <div class="user-footer">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div class="user-avatar">{{ username[0]|upper }}</div>
+            <div>
+                <div style="font-weight:700; color:#fff; font-size:0.85rem;">{{ username }}</div>
+                <div style="font-size:0.72rem; color:#64748b;">Role: {{ role }}</div>
+            </div>
+        </div>
+        <button class="btn-logout" id="bOut">Sign Out</button>
+    </div>
+</aside>
+
+<main class="workspace">
+    <header class="header-bar">
+        <div>
+            <div style="font-weight:700; color:#fff;" id="tHead">SmartCampus Assistant Desk</div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Nikhil Kumar Singh &bull; Team FutureMind &bull; Oct 2026</div>
+        </div>
+    </header>
+
+    <div class="chat-scroll" id="cBox">
+        <div class="msg-row bot">
+            <div class="msg-avatar">AI</div>
+            <div class="bubble">{% if role == 'admin' %}Hello Admin! Welcome back to SmartCampus AI.{% elif role == 'faculty' %}Hello Faculty {{ username }}! How can I assist you with your campus records?{% else %}Hello {{ username }}! How can I assist you with campus records today?{% endif %}</div>
+        </div>
+    </div>
+
+    <div class="prompt-chips">
+        <div class="chip" onclick="sendQuickPrompt('Who am I?')">Who am I?</div>
+        <div class="chip" onclick="sendQuickPrompt('give me detail information about hachathon')">Hackathon Overview</div>
+        <div class="chip" onclick="sendQuickPrompt('Who built you?')">Who made you?</div>
+    </div>
+
+    <div class="input-dock">
+        <form class="input-box" id="cForm">
+            <input type="text" id="uIn" placeholder="Ask a question about campus documents, results, or rules..." autocomplete="off">
+            <button type="submit" class="btn-send">Send</button>
+        </form>
+    </div>
+</main>
+
+<div class="modal-overlay" id="mUp">
+    <div class="modal-card">
+        <h3 id="modalTitle" style="color:#fff; margin-bottom:6px;">Campus Data Ingestion</h3>
+        <p id="modalDesc" style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">Upload files to index.</p>
+        <form id="fUp" style="margin-bottom:14px;">
+            <input type="file" id="fiDoc" accept=".pdf,.docx,.csv,.png,.jpg,.jpeg" required style="width:100%; margin-bottom:10px; color:#cbd5e1; font-size:0.85rem;">
+            <div id="upFb" style="font-size:0.8rem; margin-bottom:8px;"></div>
+            <button type="submit" style="width:100%; padding:10px; background:var(--primary); border:none; border-radius:8px; color:#fff; font-weight:700; cursor:pointer;">Upload & Index</button>
+        </form>
+        <hr style="border:0; border-top:1px solid var(--border-subtle); margin-bottom:12px;">
+        <div style="font-size:0.82rem; font-weight:700; color:#fff; margin-bottom:8px;">Active Records</div>
+        <div id="dList" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
+        <button type="button" id="bClsUp" style="margin-top:14px; width:100%; padding:9px; background:transparent; border:1px solid var(--border-subtle); border-radius:8px; color:var(--text-muted); cursor:pointer;">Close</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="mFac">
+    <div class="modal-card" style="max-width:400px;">
+        <h3 style="color:#fff; margin-bottom:6px;">Create Faculty ID</h3>
+        <form id="fFac">
+            <input type="text" id="fcU" placeholder="Faculty Username" required style="width:100%; padding:10px; background:#0b0f19; border:1px solid var(--border-subtle); border-radius:8px; color:#fff; margin-bottom:10px; outline:none;">
+            <input type="email" id="fcE" placeholder="Faculty Email" required style="width:100%; padding:10px; background:#0b0f19; border:1px solid var(--border-subtle); border-radius:8px; color:#fff; margin-bottom:10px; outline:none;">
+            <input type="password" id="fcP" placeholder="Password" required style="width:100%; padding:10px; background:#0b0f19; border:1px solid var(--border-subtle); border-radius:8px; color:#fff; margin-bottom:10px; outline:none;">
+            <div id="fcFb" style="font-size:0.8rem; margin-bottom:8px;"></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button type="button" id="bClsFac" style="padding:8px 14px; background:none; border:1px solid var(--border-subtle); border-radius:8px; color:var(--text-muted); cursor:pointer;">Cancel</button>
+                <button type="submit" style="padding:8px 16px; background:var(--primary); border:none; border-radius:8px; color:#fff; font-weight:700; cursor:pointer;">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var sId = '';
+    marked.setOptions({ breaks: true, gfm: true });
+
+    function addMsg(snd, contentText){
+        var row = document.createElement('div');
+        row.className = 'msg-row ' + (snd === 'user' ? 'user' : 'bot');
+        var av = document.createElement('div');
+        av.className = 'msg-avatar';
+        av.innerText = (snd === 'user' ? 'U' : 'AI');
+        var bub = document.createElement('div');
+        bub.className = 'bubble';
+        if(snd === 'bot'){ bub.innerHTML = marked.parse(contentText); }
+        else { bub.innerText = contentText; }
+        row.appendChild(av);
+        row.appendChild(bub);
+        var box = document.getElementById('cBox');
+        box.appendChild(row);
+        box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+        return row;
+    }
+
+    function sendQuickPrompt(promptText){
+        document.getElementById('uIn').value = promptText;
+        document.getElementById('cForm').dispatchEvent(new Event('submit'));
+    }
+
+    function loadSessions(){
+        fetch('/api/sessions').then(function(r){ return r.json(); }).then(function(d){
+            var l = document.getElementById('sList');
+            l.innerHTML = '';
+            (d.sessions||[]).forEach(function(s){
+                var row = document.createElement('div');
+                row.className = 'session-item-row' + (s.session_id === sId ? ' active' : '');
+
+                var title = document.createElement('div');
+                title.className = 'session-title-text';
+                title.innerText = s.title;
+                title.onclick = function(){
+                    sId = s.session_id;
+                    document.getElementById('tHead').innerText = s.title;
+                    loadSessions();
+                    fetch('/api/history/' + s.session_id).then(function(hr){ return hr.json(); }).then(function(hd){
+                        document.getElementById('cBox').innerHTML = '';
+                        (hd.history||[]).forEach(function(m){ addMsg(m.sender, m.content); });
+                    });
+                };
+
+                var delBtn = document.createElement('button');
+                delBtn.className = 'btn-del-thread';
+                delBtn.innerText = 'DEL';
+                delBtn.onclick = function(e){
+                    e.stopPropagation();
+                    if(confirm("Delete conversation: '" + s.title + "'?")){
+                        fetch('/api/delete_session', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({session_id: s.session_id})
+                        })
+                        .then(function(r){ return r.json(); })
+                        .then(function(res){
+                            if(res.success){
+                                if(sId === s.session_id){
+                                    sId = '';
+                                    document.getElementById('cBox').innerHTML = '<div class="msg-row bot"><div class="msg-avatar">AI</div><div class="bubble">Thread deleted. How can I assist you?</div></div>';
+                                }
+                                loadSessions();
+                            }
+                        });
+                    }
+                };
+
+                row.appendChild(title);
+                row.appendChild(delBtn);
+                l.appendChild(row);
+            });
+        });
+    }
+
+    function addThinkingIndicator(){
+        var row = document.createElement('div');
+        row.className = 'msg-row bot thinking-row';
+        row.innerHTML = 
+            '<div class="msg-avatar">AI</div>' +
+            '<div class="bubble thinking-bubble">' +
+                '<div class="thinking-logo-wrap">' +
+                    '<svg class="thinking-logo-svg" viewBox="0 0 48 48" fill="none">' +
+                        '<path class="thinking-star" d="M24 4L28.5 17.5L42 22L28.5 26.5L24 40L19.5 26.5L6 22L19.5 17.5L24 4Z" fill="#818cf8" opacity="0.95" />' +
+                        '<circle class="thinking-ring" cx="24" cy="22" r="14" stroke="#818cf8" stroke-width="1.8" stroke-dasharray="3 3" />' +
+                        '<circle class="thinking-core" cx="24" cy="22" r="4" fill="#ffffff" />' +
+                    '</svg>' +
+                '</div>' +
+                '<div class="thinking-text-wrap">' +
+                    '<span class="thinking-label">Thinking</span>' +
+                    '<span class="thinking-dots">' +
+                        '<span>.</span><span>.</span><span>.</span>' +
+                    '</span>' +
+                '</div>' +
+            '</div>';
+        var box = document.getElementById('cBox');
+        box.appendChild(row);
+        box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+        return row;
+    }
+
+    document.getElementById('bNewChat').onclick = function(){
+        sId = '';
+        document.getElementById('cBox').innerHTML = '<div class="msg-row bot"><div class="msg-avatar">AI</div><div class="bubble">Started a new conversation thread. How can I help you?</div></div>';
+        document.getElementById('tHead').innerText = 'New Chat Thread';
+        loadSessions();
+    };
+
+    document.getElementById('cForm').onsubmit = function(e){
+        e.preventDefault();
+        var inp = document.getElementById('uIn');
+        var q = inp.value.trim();
+        if(!q) return;
+
+        addMsg('user', q);
+        inp.value = '';
+        var thk = addThinkingIndicator();
+
+        fetch('/api/chat', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({query:q, session_id:sId})
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            thk.remove();
+            sId = d.session_id;
+            addMsg('bot', d.answer || "I am here to help you!");
+            loadSessions();
+        })
+        .catch(function(){
+            thk.remove();
+            addMsg('bot', 'Network connection error. Please try again.');
+        });
+    };
+
+    function loadDocs(){
+        var box = document.getElementById('dList');
+        box.innerHTML = '<div style="font-size:0.75rem; color:#64748b;">Loading files...</div>';
+        fetch('/api/documents').then(function(r){ return r.json(); }).then(function(d){
+            box.innerHTML = '';
+            if(!d.documents || !d.documents.length){
+                box.innerHTML = '<div style="font-size:0.78rem; color:#64748b;">No documents uploaded yet.</div>';
+                return;
+            }
+            d.documents.forEach(function(doc){
+                var r = document.createElement('div');
+                r.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px;';
+                r.innerHTML = '<div><div style="font-size:0.82rem; color:#fff; font-weight:600;">'+doc.filename+'</div><div style="font-size:0.7rem; color:#64748b;">'+doc.total_chunks+' Chunks Indexed</div></div><button class="btn-del-thread">DEL</button>';
+                r.querySelector('button').onclick = function(){
+                    if(confirm("Delete '"+doc.filename+"' from database?")){
+                        fetch('/api/delete_document', {
+                            method:'POST',
+                            headers:{'Content-Type':'application/json'},
+                            body:JSON.stringify({filename:doc.filename})
+                        }).then(function(){ loadDocs(); });
+                    }
+                };
+                box.appendChild(r);
+            });
+        });
+    }
+
+    var mUp = document.getElementById('mUp'), mFac = document.getElementById('mFac');
+    var bUp = document.getElementById('bUpM'), bUpImg = document.getElementById('bUpImg'), bFac = document.getElementById('bFacM');
+
+    if(bUp) bUp.onclick = function(){ 
+        document.getElementById('modalTitle').innerText = 'Campus Document Desk';
+        document.getElementById('modalDesc').innerText = 'Upload PDF, DOCX, or CSV documents.';
+        document.getElementById('fiDoc').accept = '.pdf,.docx,.csv';
+        mUp.style.display = 'flex'; 
+        loadDocs(); 
+    };
+
+    if(bUpImg) bUpImg.onclick = function(){ 
+        document.getElementById('modalTitle').innerText = 'Campus Image & Poster OCR';
+        document.getElementById('modalDesc').innerText = 'Upload PNG or JPG photos of notices/posters.';
+        document.getElementById('fiDoc').accept = '.png,.jpg,.jpeg';
+        mUp.style.display = 'flex'; 
+        loadDocs(); 
+    };
+
+    if(bFac) bFac.onclick = function(){ mFac.style.display = 'flex'; };
+    document.getElementById('bClsUp').onclick = function(){ mUp.style.display = 'none'; };
+    var clsFac = document.getElementById('bClsFac');
+    if(clsFac) clsFac.onclick = function(){ mFac.style.display = 'none'; };
+
+    document.getElementById('fUp').onsubmit = function(e){
+        e.preventDefault();
+        var fi = document.getElementById('fiDoc');
+        if(!fi.files.length) return;
+        var fd = new FormData();
+        fd.append('file', fi.files[0]);
+        var fb = document.getElementById('upFb');
+        fb.style.color = '#cbd5e1'; fb.innerText = 'Extracting and indexing text chunks...';
+        fetch('/api/upload_document', {method:'POST', body:fd}).then(function(r){ return r.json(); }).then(function(d){
+            fb.style.color = d.success ? '#4ade80' : '#f87171';
+            fb.innerText = d.message;
+            fi.value = '';
+            loadDocs();
+        });
+    };
+
+    var fFac = document.getElementById('fFac');
+    if(fFac){
+        fFac.onsubmit = function(e){
+            e.preventDefault();
+            var u = document.getElementById('fcU').value.trim();
+            var em = document.getElementById('fcE').value.trim();
+            var p = document.getElementById('fcP').value.trim();
+            var fb = document.getElementById('fcFb');
+            fetch('/api/admin/create_faculty', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({username:u, email:em, password:p})
+            }).then(function(r){ return r.json(); }).then(function(d){
+                fb.style.color = d.success ? '#4ade80' : '#f87171';
+                fb.innerText = d.message || d.error;
+                if(d.success) setTimeout(function(){ mFac.style.display = 'none'; fb.innerText = ''; }, 1200);
+            });
+        };
+    }
+
+    document.getElementById('bOut').onclick = function(){
+        fetch('/api/logout', {method:'POST'}).then(function(){ window.location.href = '/login'; });
+    };
+
+    loadSessions();
+</script>
+</body>
+</html>
